@@ -2,8 +2,7 @@
 
 Aplikasi Survey App berbasis web yang modern, aman, dan sepenuhnya dinamis. Aplikasi ini menggunakan **Google Sheets** sebagai database dan CMS (Content Management System), **Google Apps Script** sebagai Backend API, dan **Vercel** sebagai Proxy Serverless & Hosting Frontend.
 
-![App Preview](https://via.placeholder.com/800x400?text=Preview+Aplikasi+Login+dan+Form)
-*(Ganti link di atas dengan screenshot halaman login/form aplikasi Anda)*
+![App Preview](https://github.com/fahroediin/gas-survey/blob/main/screenshots/login.png)
 
 ## 🌟 Fitur Utama
 
@@ -120,18 +119,15 @@ Tempat jawaban tersimpan (Biarkan baris 2 kosong, header saja).
 
 ### 1. Halaman Login (Skeleton Loading & Glassmorphism)
 Tampilan awal saat memuat konfigurasi dari Spreadsheet.
-![Login Skeleton](https://via.placeholder.com/600x400?text=Screenshot+Login+Skeleton)
-*(Tempatkan screenshot halaman login Anda di sini)*
+![Login Skeleton](https://github.com/fahroediin/gas-survey/blob/main/screenshots/skeleton-login.png)
 
 ### 2. Halaman Form (Dynamic Rendering)
 Form yang digenerate otomatis berdasarkan sheet `Questions`.
-![Form UI](https://via.placeholder.com/600x400?text=Screenshot+Form+UI)
-*(Tempatkan screenshot halaman form Anda di sini)*
+![Form UI](https://github.com/fahroediin/gas-survey/blob/main/screenshots/questions.png)
 
 ### 3. Konfigurasi Spreadsheet
 Tampilan data di Google Sheets.
-![Spreadsheet Config](https://via.placeholder.com/600x200?text=Screenshot+Spreadsheet+Tabs)
-*(Tempatkan screenshot tab Questions/Settings di sini)*
+![Spreadsheet Config](https://github.com/fahroediin/gas-survey/blob/main/screenshots/questions-worksheet.png)
 
 ---
 
@@ -151,5 +147,3 @@ Tampilan data di Google Sheets.
 *   **Keamanan:** Jangan pernah membagikan `PROXY_SECRET` atau `GAS_URL` secara publik.
 
 ---
-
-Made with ❤️ by Fahrudin
