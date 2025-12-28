@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedback Intern BA - PT. Perkasa Pilar Utama</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Login Intern</h2>
+                <p>Silakan masuk untuk melanjutkan</p>
+            </div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" required>
+                </div>
+                <button type="submit" class="submit-btn">Masuk</button>
+                <p id="loginError" class="error-text"></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="header">
+            <h1>Formulir Feedback Intern Business Analyst</h1>
+            <p>PT. Perkasa Pilar Utama</p>
+        </div>
+        
+        <div class="form-content">
+            <form id="feedbackForm">
+                <!-- BAGIAN A: DATA DIRI -->
+                <div class="section">
+                    <h2 class="section-title">A. Data Diri</h2>
+                    <div class="form-group">
+                        <label>Nama <span class="required">*</span></label>
+                        <select id="nama" name="nama" required>
+                            <option value="">Memuat data...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Periode Magang <span class="required">*</span></label>
+                        <input type="text" name="periodeWaktu" placeholder="Contoh: Januari - Juni 2024" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Divisi/Tim <span class="required">*</span></label>
+                        <input type="text" name="divisi" placeholder="Contoh: Business Analysis" required>
+                    </div>
+                </div>
+
+                <!-- BAGIAN B: FEEDBACK UTAMA -->
+                <div class="section">
+                    <h2 class="section-title">B. Feedback Utama</h2>
+                    
+                    <div class="form-group">
+                        <label>Kepuasan Keseluruhan <span class="required">*</span></label>
+                        <div class="scale-group">
+                            <div class="scale-option"><input type="radio" id="s1" name="kepuasanKeseluruhan" value="1" required><label for="s1">1</label></div>
+                            <div class="scale-option"><input type="radio" id="s2" name="kepuasanKeseluruhan" value="2"><label for="s2">2</label></div>
+                            <div class="scale-option"><input type="radio" id="s3" name="kepuasanKeseluruhan" value="3"><label for="s3">3</label></div>
+                            <div class="scale-option"><input type="radio" id="s4" name="kepuasanKeseluruhan" value="4"><label for="s4">4</label></div>
+                            <div class="scale-option"><input type="radio" id="s5" name="kepuasanKeseluruhan" value="5"><label for="s5">5</label></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Apa yang sudah baik?</label>
+                        <textarea name="yangBaik"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Apa yang perlu diperbaiki?</label>
+                        <textarea name="saranKonkret"></textarea>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">Kirim Feedback</button>
+                
+                <div class="loading" id="loadingDiv">
+                    <div class="spinner"></div>
+                    <p>Mengirim data...</p>
+                </div>
+                
+                <div class="success-message" id="successMsg">
+                    <h3>Terima Kasih!</h3>
+                    <p>Feedback Anda telah berhasil dikirim.</p>
+                </div>
+                
+                <div class="error-message" id="errorMsg">
+                    <h3>Gagal Mengirim</h3>
+                    <p id="errorText">Silakan coba lagi.</p>
+                </div>
+            </form>
+        </div>
+        
+        <div class="footer">
+            Business Analyst @PT. Perkasa Pilar Utama
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
