@@ -11,7 +11,7 @@ export default async function handler(req, res) {
   const JWT_SECRET = process.env.JWT_SECRET || 'rahasia';
 
   try {
-    // 1. Tanya ke GAS: Valid gak user ini?
+    // Tanya ke GAS: Valid gak user ini?
     const gasResponse = await fetch(GAS_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -26,12 +26,10 @@ export default async function handler(req, res) {
     const gasResult = await gasResponse.json();
 
     if (gasResult.status === 'success') {
-      // 2. Jika Valid, Buat JWT
-      // Kita simpan info user dari sheet ke dalam token
+      // Buat Token JWT
       const token = jwt.sign({ 
         user: username, 
-        name: gasResult.user.name,
-        period: gasResult.user.period 
+        name: gasResult.user.name 
       }, JWT_SECRET, { expiresIn: '4h' });
       
       return res.status(200).json({ status: 'success', token, user: gasResult.user });
