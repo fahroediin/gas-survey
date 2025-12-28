@@ -12,8 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // --- LOAD PUBLIC SETTINGS (SKELETON HANDLER) ---
 async function loadPublicSettings() {
     const titleEl = document.getElementById('loginTitleText');
-    const logoEl = document.getElementById('appLogo');
-
+    
     try {
         const response = await fetch(`${API_BASE}/proxy`, {
             method: 'POST',
@@ -32,18 +31,25 @@ async function loadPublicSettings() {
             document.getElementById('companyName').textContent = s.companyName;
             document.getElementById('footerText').textContent = `${s.footerText} @ ${s.companyName}`;
             
-            // Hapus Skeleton dengan sedikit delay agar smooth
+            // Update Judul Login
+            titleEl.textContent = s.loginTitle || "Login Intern";
+
+            // HAPUS SEMUA SKELETON SETELAH DATA SIAP
             setTimeout(() => {
-                titleEl.textContent = s.loginTitle || "Login Intern";
-                titleEl.classList.remove('skeleton', 'skeleton-text');
-                logoEl.classList.remove('skeleton');
+                const skeletons = document.querySelectorAll('#loginModal .skeleton');
+                skeletons.forEach(el => {
+                    el.classList.remove('skeleton', 'skeleton-text');
+                    // Reset inline width pada label
+                    if(el.tagName === 'LABEL') el.style.width = '';
+                });
             }, 500);
         }
     } catch (error) {
         console.error("Gagal memuat settings:", error);
         titleEl.textContent = "Survey App";
-        titleEl.classList.remove('skeleton', 'skeleton-text');
-        logoEl.classList.remove('skeleton');
+        // Fallback remove skeleton
+        const skeletons = document.querySelectorAll('#loginModal .skeleton');
+        skeletons.forEach(el => el.classList.remove('skeleton', 'skeleton-text'));
     }
 }
 

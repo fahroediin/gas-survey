@@ -19,7 +19,7 @@
 
             <div class="modal-header login-header">
                 <div class="brand-container">
-                    <!-- SKELETON LOADING CLASS -->
+                    <!-- SKELETON: Logo & Judul -->
                     <img src="favicon.png" alt="Logo" class="app-logo skeleton" id="appLogo">
                     <h2 id="loginTitleText" class="skeleton skeleton-text">Loading...</h2>
                 </div>
@@ -28,14 +28,19 @@
             
             <form id="loginForm">
                 <div class="form-group">
-                    <label for="username">Username</label>
-                    <input type="text" id="username" required placeholder="Masukkan username">
+                    <!-- SKELETON: Label & Input Username -->
+                    <label for="username" class="skeleton skeleton-text" style="width: 80px;">Username</label>
+                    <input type="text" id="username" required placeholder="Masukkan username" class="skeleton">
                 </div>
                 <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" required placeholder="Masukkan password">
+                    <!-- SKELETON: Label & Input Password -->
+                    <label for="password" class="skeleton skeleton-text" style="width: 80px;">Password</label>
+                    <input type="password" id="password" required placeholder="Masukkan password" class="skeleton">
                 </div>
-                <button type="submit" class="submit-btn">Masuk</button>
+                
+                <!-- SKELETON: Tombol -->
+                <button type="submit" class="submit-btn skeleton">Masuk</button>
+                
                 <p id="loginError" class="error-text"></p>
             </form>
         </div>
