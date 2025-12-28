@@ -69,7 +69,11 @@ async function loadConfiguration() {
             document.title = result.settings.pageTitle;
             document.getElementById('pageTitle').textContent = result.settings.pageTitle;
             document.getElementById('companyName').textContent = result.settings.companyName;
-            document.getElementById('footerText').textContent = result.settings.footerText;
+            
+            // --- PERUBAHAN DI SINI ---
+            // Menggabungkan Footer Text + @ + Company Name
+            document.getElementById('footerText').textContent = `${result.settings.footerText} @ ${result.settings.companyName}`;
+            // -------------------------
 
             // 2. Render Pertanyaan
             renderQuestions(result.questions);
