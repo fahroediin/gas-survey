@@ -187,6 +187,25 @@ textarea { min-height: 100px; resize: vertical; }
     font-weight: 500;
 }
 
+/* Tambahan untuk Dynamic Form */
+.hidden { display: none !important; }
+
+.loading-spinner {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+}
+
+/* Memastikan container utama tidak flash saat loading */
+#mainContainer {
+    animation: fadeIn 0.5s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
 @media (max-width: 600px) {
     .scale-group { flex-wrap: wrap; }
     .scale-option { min-width: 45px; }

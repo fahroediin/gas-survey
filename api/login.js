@@ -1,27 +1,45 @@
 const jwt = require('jsonwebtoken');
 
 export default async function handler(req, res) {
-  // Handle CORS Preflight (Double check)
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
-  if (req.method !== 'POST') {
-    return res.status(405).json({ status: 'error', message: 'Method not allowed' });
-  }
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method !== 'POST') return res.status(405).json({ message: 'Method not allowed' });
 
   const { username, password } = req.body;
   
-  // Ambil credentials dari Environment Variables Vercel
-  const VALID_USER = process.env.LOGIN_USER || 'intern';
-  const VALID_PASS = process.env.LOGIN_PASS || 'magang2025';
+  const GAS_URL = process.env.GAS_URL;
+  const PROXY_SECRET = process.env.PROXY_SECRET;
   const JWT_SECRET = process.env.JWT_SECRET || 'rahasia';
 
-  if (username === VALID_USER && password === VALID_PASS) {
-    // Buat Token (Expired 2 jam)
-    const token = jwt.sign({ user: username }, JWT_SECRET, { expiresIn: '2h' });
-    return res.status(200).json({ status: 'success', token });
-  }
+  try {
+    // 1. Tanya ke GAS: Valid gak user ini?
+    const gasResponse = await fetch(GAS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'login',
+        proxySecret: PROXY_SECRET,
+        username: username,
+        password: password
+      })
+    });
 
-  return res.status(401).json({ status: 'error', message: 'Username atau password salah' });
+    const gasResult = await gasResponse.json();
+
+    if (gasResult.status === 'success') {
+      // 2. Jika Valid, Buat JWT
+      // Kita simpan info user dari sheet ke dalam token
+      const token = jwt.sign({ 
+        user: username, 
+        name: gasResult.user.name,
+        period: gasResult.user.period 
+      }, JWT_SECRET, { expiresIn: '4h' });
+      
+      return res.status(200).json({ status: 'success', token, user: gasResult.user });
+    } else {
+      return res.status(401).json({ status: 'error', message: gasResult.message });
+    }
+
+  } catch (error) {
+    return res.status(500).json({ status: 'error', message: error.message });
+  }
 }
