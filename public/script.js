@@ -5,12 +5,15 @@ localStorage.clear();
 
 document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('loginModal').classList.remove('hidden');
-    // 2. Load Judul & Logo (Public)
+    // 2. Load Judul & Logo (Public) dengan Skeleton
     loadPublicSettings();
 });
 
-// --- LOAD PUBLIC SETTINGS ---
+// --- LOAD PUBLIC SETTINGS (SKELETON HANDLER) ---
 async function loadPublicSettings() {
+    const titleEl = document.getElementById('loginTitleText');
+    const logoEl = document.getElementById('appLogo');
+
     try {
         const response = await fetch(`${API_BASE}/proxy`, {
             method: 'POST',
@@ -22,32 +25,46 @@ async function loadPublicSettings() {
         
         if (result && result.status === 'success') {
             const s = result.settings;
+            
+            // Update Data Halaman Utama
             document.title = s.pageTitle;
             document.getElementById('pageTitle').textContent = s.pageTitle;
             document.getElementById('companyName').textContent = s.companyName;
             document.getElementById('footerText').textContent = `${s.footerText} @ ${s.companyName}`;
-            document.getElementById('loginTitleText').textContent = s.loginTitle || "Login Intern";
+            
+            // Hapus Skeleton dengan sedikit delay agar smooth
+            setTimeout(() => {
+                titleEl.textContent = s.loginTitle || "Login Intern";
+                titleEl.classList.remove('skeleton', 'skeleton-text');
+                logoEl.classList.remove('skeleton');
+            }, 500);
         }
     } catch (error) {
         console.error("Gagal memuat settings:", error);
-        document.getElementById('loginTitleText').textContent = "Survey App";
+        titleEl.textContent = "Survey App";
+        titleEl.classList.remove('skeleton', 'skeleton-text');
+        logoEl.classList.remove('skeleton');
     }
 }
 
-// --- LOGIN HANDLER ---
+// --- LOGIN HANDLER (PROGRESS BAR) ---
 document.getElementById('loginForm').addEventListener('submit', async function(e) {
     e.preventDefault();
+    
     const user = document.getElementById('username').value;
     const pass = document.getElementById('password').value;
     const errorMsg = document.getElementById('loginError');
     const btn = this.querySelector('button');
+    const progressBar = document.getElementById('loginProgressBar');
 
+    // UI State: Loading
     btn.disabled = true;
-    btn.textContent = "Memuat...";
+    btn.textContent = "Memproses...";
     errorMsg.textContent = "";
+    progressBar.classList.remove('hidden'); // Tampilkan Progress Bar
 
     try {
-        // A. Login
+        // 1. Login
         const loginResponse = await fetch(`${API_BASE}/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -62,12 +79,13 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
         localStorage.setItem('internToken', loginResult.token);
         localStorage.setItem('userData', JSON.stringify(loginResult.user));
 
-        // B. Load Questions (Private)
+        // 2. Load Questions
         const qData = await fetchQuestionsInternal(loginResult.token);
         if (!qData) throw new Error("Gagal memuat pertanyaan.");
 
         renderQuestions(qData.questions);
         
+        // Sukses
         document.getElementById('loginModal').classList.add('hidden');
         document.getElementById('mainContainer').classList.remove('hidden');
 
@@ -77,6 +95,7 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
     } finally {
         btn.disabled = false;
         btn.textContent = "Masuk";
+        progressBar.classList.add('hidden'); // Sembunyikan Progress Bar
     }
 });
 
@@ -96,7 +115,6 @@ async function fetchQuestionsInternal(token) {
     } catch (e) { throw e; }
 }
 
-// --- RENDER FORM ---
 function renderQuestions(questions) {
     const container = document.getElementById('dynamicFormContainer');
     container.innerHTML = ''; 
@@ -224,7 +242,23 @@ document.getElementById('feedbackForm').addEventListener('submit', async functio
     const payload = { action: 'submit', answers: answers };
 
     try {
-        const result = await fetchWithAuth(payload);
+        const token = localStorage.getItem('internToken');
+        const response = await fetch(`${API_BASE}/proxy`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (response.status === 401 || response.status === 403) {
+            localStorage.clear();
+            location.reload();
+            return;
+        }
+        
+        const result = await response.json();
         globalLoading.classList.add('hidden');
         if (result && result.status === 'success') {
             alert("Terima kasih! Feedback Anda berhasil disimpan.");
@@ -239,21 +273,3 @@ document.getElementById('feedbackForm').addEventListener('submit', async functio
         btn.disabled = false;
     }
 });
-
-async function fetchWithAuth(payload) {
-    const token = localStorage.getItem('internToken');
-    const response = await fetch(`${API_BASE}/proxy`, {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-    });
-    if (response.status === 401 || response.status === 403) {
-        localStorage.clear();
-        location.reload();
-        return null;
-    }
-    return response.json();
-}

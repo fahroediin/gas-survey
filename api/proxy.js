@@ -1,12 +1,10 @@
 const jwt = require('jsonwebtoken');
 
 export default async function handler(req, res) {
-  // Handle CORS Preflight
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ message: 'Method not allowed' });
 
-  // --- LOGIKA AUTHENTICATION ---
-  // Action 'getSettings' boleh diakses tanpa token (Public)
+  // Bypass Auth untuk Public Settings
   const isPublicAction = req.body.action === 'getSettings';
 
   if (!isPublicAction) {
@@ -25,15 +23,11 @@ export default async function handler(req, res) {
     }
   }
 
-  // --- PROXY KE GOOGLE APPS SCRIPT ---
   const GAS_URL = process.env.GAS_URL;
   const PROXY_SECRET = process.env.PROXY_SECRET;
 
   try {
-    const payload = {
-      ...req.body,
-      proxySecret: PROXY_SECRET
-    };
+    const payload = { ...req.body, proxySecret: PROXY_SECRET };
 
     const gasResponse = await fetch(GAS_URL, {
       method: 'POST',
@@ -41,7 +35,6 @@ export default async function handler(req, res) {
       body: JSON.stringify(payload)
     });
 
-    // Cek Error HTML dari Google (Biasanya karena URL salah)
     const contentType = gasResponse.headers.get("content-type");
     if (contentType && contentType.includes("text/html")) {
         return res.status(500).json({ status: 'error', message: 'Database Error (GAS returned HTML)' });

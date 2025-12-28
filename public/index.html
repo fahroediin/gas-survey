@@ -11,13 +11,21 @@
     <!-- Login Modal -->
     <div id="loginModal" class="modal-overlay">
         <div class="modal-content login-card">
+            
+            <!-- PROGRESS BAR (Muncul saat klik Masuk) -->
+            <div id="loginProgressBar" class="login-progress hidden">
+                <div class="indeterminate"></div>
+            </div>
+
             <div class="modal-header login-header">
                 <div class="brand-container">
-                    <img src="favicon.png" alt="Logo" class="app-logo">
-                    <h2 id="loginTitleText">Loading...</h2>
+                    <!-- SKELETON LOADING CLASS -->
+                    <img src="favicon.png" alt="Logo" class="app-logo skeleton" id="appLogo">
+                    <h2 id="loginTitleText" class="skeleton skeleton-text">Loading...</h2>
                 </div>
                 <p>Silakan masuk untuk melanjutkan</p>
             </div>
+            
             <form id="loginForm">
                 <div class="form-group">
                     <label for="username">Username</label>
@@ -52,9 +60,7 @@
             </form>
         </div>
         
-        <div class="footer" id="footerText">
-            Loading...
-        </div>
+        <div class="footer" id="footerText">Loading...</div>
     </div>
 
     <!-- Loading Overlay Global -->

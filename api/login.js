@@ -11,7 +11,6 @@ export default async function handler(req, res) {
   const JWT_SECRET = process.env.JWT_SECRET || 'rahasia';
 
   try {
-    // Tanya ke GAS: Valid gak user ini?
     const gasResponse = await fetch(GAS_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -26,7 +25,6 @@ export default async function handler(req, res) {
     const gasResult = await gasResponse.json();
 
     if (gasResult.status === 'success') {
-      // Buat Token JWT
       const token = jwt.sign({ 
         user: username, 
         name: gasResult.user.name 

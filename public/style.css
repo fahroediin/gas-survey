@@ -13,7 +13,6 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    /* Background Modern Gradient */
     background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
     color: var(--text);
     padding: 20px;
@@ -21,11 +20,11 @@ body {
     min-height: 100vh;
 }
 
-/* --- MODAL & LOGIN CARD --- */
+/* --- LOGIN CARD & MODAL --- */
 .modal-overlay {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.6); /* Overlay lebih gelap */
+    background: rgba(0,0,0,0.6);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -34,12 +33,11 @@ body {
     transition: opacity 0.3s;
 }
 
-.modal-overlay.hidden {
-    opacity: 0;
-    pointer-events: none;
-}
+.modal-overlay.hidden { opacity: 0; pointer-events: none; }
 
 .login-card {
+    position: relative;
+    overflow: hidden;
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
     border-radius: 16px;
@@ -49,138 +47,110 @@ body {
     max-width: 420px;
 }
 
+/* --- PROGRESS BAR --- */
+.login-progress {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 4px;
+    background-color: #e0e0e0;
+    z-index: 10;
+}
+.login-progress .indeterminate { background-color: var(--primary); }
+.login-progress .indeterminate:before {
+    content: ''; position: absolute; background-color: inherit;
+    top: 0; left: 0; bottom: 0;
+    will-change: left, right;
+    animation: indeterminate 2.1s cubic-bezier(0.65, 0.815, 0.735, 0.395) infinite;
+}
+.login-progress .indeterminate:after {
+    content: ''; position: absolute; background-color: inherit;
+    top: 0; left: 0; bottom: 0;
+    will-change: left, right;
+    animation: indeterminate-short 2.1s cubic-bezier(0.165, 0.84, 0.44, 1) infinite;
+    animation-delay: 1.15s;
+}
+@keyframes indeterminate {
+    0% { left: -35%; right: 100%; }
+    60% { left: 100%; right: -90%; }
+    100% { left: 100%; right: -90%; }
+}
+@keyframes indeterminate-short {
+    0% { left: -200%; right: 100%; }
+    60% { left: 107%; right: -8%; }
+    100% { left: 107%; right: -8%; }
+}
+
+/* --- SKELETON LOADING --- */
+.skeleton {
+    background: #eee;
+    background: linear-gradient(110deg, #ececec 8%, #f5f5f5 18%, #ececec 33%);
+    border-radius: 5px;
+    background-size: 200% 100%;
+    animation: 1.5s shine linear infinite;
+    color: transparent !important;
+    user-select: none;
+}
+.skeleton-text { min-width: 150px; min-height: 24px; display: inline-block; }
+img.skeleton { filter: grayscale(100%) opacity(0.3); }
+@keyframes shine { to { background-position-x: -200%; } }
+
+/* --- HEADER LOGIN --- */
 .brand-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    margin-bottom: 10px;
+    display: flex; align-items: center; justify-content: center;
+    gap: 12px; margin-bottom: 10px;
 }
+.app-logo { width: 40px; height: 40px; object-fit: contain; }
+.login-header h2 { color: var(--secondary); font-size: 24px; margin: 0; font-weight: 700; }
+.login-header p { color: #666; font-size: 14px; margin-top: 5px; text-align: center; }
 
-.app-logo {
-    width: 40px;
-    height: 40px;
-    object-fit: contain;
-}
-
-.login-header h2 {
-    color: var(--secondary);
-    font-size: 24px;
-    margin: 0;
-    font-weight: 700;
-}
-
-.login-header p {
-    color: #666;
-    font-size: 14px;
-    margin-top: 5px;
-    text-align: center;
-}
-
+/* --- INPUTS --- */
 .login-card input {
     background: #f8f9fa;
     border: 2px solid #e9ecef;
     transition: all 0.3s;
+    width: 100%; padding: 12px; border-radius: 6px;
 }
-
 .login-card input:focus {
-    background: #fff;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 4px rgba(74, 105, 189, 0.1);
+    background: #fff; border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(74, 105, 189, 0.1); outline: none;
 }
 
 /* --- MAIN CONTAINER --- */
 .container {
-    max-width: 800px;
-    margin: 0 auto;
-    background: var(--white);
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    overflow: hidden;
+    max-width: 800px; margin: 0 auto;
+    background: var(--white); border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2); overflow: hidden;
 }
-
 .header {
     background: linear-gradient(135deg, var(--primary), var(--secondary));
-    color: white;
-    padding: 40px 30px;
-    text-align: center;
+    color: white; padding: 40px 30px; text-align: center;
 }
-
 .header h1 { font-size: 24px; margin-bottom: 5px; }
 .header p { font-size: 14px; opacity: 0.9; }
-
 .form-content { padding: 40px; }
-
-.section {
-    margin-bottom: 30px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid #eee;
-}
-
+.section { margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #eee; }
 .section-title {
-    color: var(--secondary);
-    font-size: 18px;
-    margin-bottom: 20px;
-    font-weight: 600;
-    border-left: 4px solid var(--primary);
-    padding-left: 15px;
+    color: var(--secondary); font-size: 18px; margin-bottom: 20px;
+    font-weight: 600; border-left: 4px solid var(--primary); padding-left: 15px;
 }
-
 .form-group { margin-bottom: 25px; }
-
-label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 500;
-    font-size: 15px;
-}
-
+label { display: block; margin-bottom: 8px; font-weight: 500; font-size: 15px; }
 .required { color: var(--error); }
-
-input[type="text"], input[type="password"], select, textarea {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    font-family: inherit;
-    font-size: 14px;
-    transition: border 0.3s;
+input[type="text"], textarea {
+    width: 100%; padding: 12px; border: 1px solid var(--border);
+    border-radius: 6px; font-family: inherit; font-size: 14px;
 }
-
-input:focus, select:focus, textarea:focus {
-    outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(74, 105, 189, 0.1);
-}
-
 textarea { min-height: 100px; resize: vertical; }
 
 /* --- RADIO BUTTONS (PERBAIKAN) --- */
-.radio-group {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-top: 8px;
-}
-
+.radio-group { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
 .radio-option {
-    display: flex;
-    align-items: flex-start;
-    padding: 8px 0;
-    cursor: pointer;
-    transition: all 0.2s;
+    display: flex; align-items: flex-start; padding: 8px 0;
+    cursor: pointer; transition: all 0.2s;
 }
-
-.radio-option:hover {
-    background-color: rgba(0,0,0,0.02);
-}
-
+.radio-option:hover { background-color: rgba(0,0,0,0.02); }
 .radio-option input[type="radio"] {
-    margin-right: 12px;
-    margin-top: 4px;
-    transform: scale(1.2);
-    cursor: pointer;
-    flex-shrink: 0;
+    margin-right: 12px; margin-top: 4px; transform: scale(1.2);
+    cursor: pointer; flex-shrink: 0;
 }
 
 /* --- SCALE BUTTONS --- */
@@ -188,61 +158,34 @@ textarea { min-height: 100px; resize: vertical; }
 .scale-option { flex: 1; text-align: center; min-width: 50px; }
 .scale-option input { display: none; }
 .scale-option label {
-    display: block;
-    padding: 12px;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.2s;
+    display: block; padding: 12px; border: 1px solid var(--border);
+    border-radius: 6px; cursor: pointer; transition: all 0.2s;
 }
 .scale-option input:checked + label {
-    background: var(--primary);
-    color: white;
-    border-color: var(--primary);
+    background: var(--primary); color: white; border-color: var(--primary);
 }
 .scale-option label:hover { border-color: var(--primary); }
 
 /* --- BUTTONS & FOOTER --- */
 .submit-btn {
-    width: 100%;
-    padding: 15px;
-    background: var(--primary);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.3s;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+    width: 100%; padding: 15px; background: var(--primary);
+    color: white; border: none; border-radius: 8px;
+    font-size: 16px; font-weight: 600; cursor: pointer;
+    transition: background 0.3s; text-transform: uppercase; letter-spacing: 1px;
 }
-
 .submit-btn:hover { background: var(--secondary); }
 .submit-btn:disabled { background: #ccc; cursor: not-allowed; }
-
 .error-text { color: var(--error); font-size: 13px; margin-top: 10px; text-align: center; }
-
 .footer {
-    background: #f8f9fa;
-    padding: 20px;
-    text-align: center;
-    font-size: 12px;
-    color: #888;
-    border-top: 1px solid #eee;
-    font-weight: 500;
+    background: #f8f9fa; padding: 20px; text-align: center;
+    font-size: 12px; color: #888; border-top: 1px solid #eee; font-weight: 500;
 }
-
 .hidden { display: none !important; }
-
 .loading-spinner { text-align: center; padding: 40px; color: #666; }
 .spinner {
-    width: 30px; height: 30px;
-    border: 3px solid #f3f3f3;
-    border-top: 3px solid var(--primary);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin: 0 auto 10px;
+    width: 30px; height: 30px; border: 3px solid #f3f3f3;
+    border-top: 3px solid var(--primary); border-radius: 50%;
+    animation: spin 1s linear infinite; margin: 0 auto 10px;
 }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
