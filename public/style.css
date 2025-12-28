@@ -201,6 +201,33 @@ textarea { min-height: 100px; resize: vertical; }
     animation: fadeIn 0.5s;
 }
 
+.radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Jarak antar pilihan ke bawah */
+    margin-top: 8px;
+}
+
+.radio-option {
+    display: flex;
+    align-items: flex-start; /* Agar teks panjang tetap rapi di atas */
+    padding: 8px 0; /* Sedikit padding atas bawah */
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.radio-option:hover {
+    background-color: rgba(0,0,0,0.02); /* Efek hover halus */
+}
+
+.radio-option input[type="radio"] {
+    margin-right: 12px; /* Jarak antara bulatan radio dengan teks label */
+    margin-top: 4px; /* Penyesuaian agar sejajar dengan baris pertama teks */
+    transform: scale(1.2); /* Memperbesar sedikit ukuran radio button */
+    cursor: pointer;
+    flex-shrink: 0; /* Mencegah radio button gepeng jika teks panjang */
+}
+
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }

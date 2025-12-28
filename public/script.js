@@ -1,97 +1,118 @@
 const API_BASE = "/api";
 
+// POIN 2: Hapus memory setiap kali refresh halaman
+// Ini memaksa user login ulang setiap kali reload
+localStorage.clear();
+
 document.addEventListener('DOMContentLoaded', function() {
-    checkAuth();
+    // Karena di-clear di awal, kita langsung tampilkan modal login
+    document.getElementById('loginModal').classList.remove('hidden');
 });
 
-// --- AUTHENTICATION ---
-
-function checkAuth() {
-    const token = localStorage.getItem('internToken');
-    if (!token) {
-        document.getElementById('loginModal').classList.remove('hidden');
-    } else {
-        document.getElementById('loginModal').classList.add('hidden');
-        document.getElementById('mainContainer').classList.remove('hidden');
-        loadConfiguration(); // Load form setelah login
-    }
-}
+// --- LOGIN & PRELOAD DATA HANDLER (POIN 1) ---
 
 document.getElementById('loginForm').addEventListener('submit', async function(e) {
     e.preventDefault();
+    
     const user = document.getElementById('username').value;
     const pass = document.getElementById('password').value;
     const errorMsg = document.getElementById('loginError');
     const btn = this.querySelector('button');
 
+    // UI Loading State
     btn.disabled = true;
-    btn.textContent = "Memverifikasi...";
+    btn.textContent = "Memuat Data..."; // Indikasi sedang loading data juga
     errorMsg.textContent = "";
 
     try {
-        const response = await fetch(`${API_BASE}/login`, {
+        // LANGKAH 1: Login untuk dapat Token
+        const loginResponse = await fetch(`${API_BASE}/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username: user, password: pass })
         });
 
-        const result = await response.json();
+        const loginResult = await loginResponse.json();
 
-        if (response.ok && result.status === 'success') {
-            localStorage.setItem('internToken', result.token);
-            // Simpan info user untuk pre-fill form nanti jika perlu
-            localStorage.setItem('userData', JSON.stringify(result.user));
-            
-            document.getElementById('loginModal').classList.add('hidden');
-            document.getElementById('mainContainer').classList.remove('hidden');
-            loadConfiguration();
-        } else {
-            errorMsg.textContent = result.message || "Login gagal.";
+        if (!loginResponse.ok || loginResult.status !== 'success') {
+            throw new Error(loginResult.message || "Login gagal.");
         }
+
+        // Simpan Token sementara
+        localStorage.setItem('internToken', loginResult.token);
+        localStorage.setItem('userData', JSON.stringify(loginResult.user));
+
+        // LANGKAH 2: Langsung Load Config/Pertanyaan (Preload)
+        // Kita panggil fungsi fetchConfig internal di sini sebelum menutup modal
+        const configData = await fetchConfigInternal(loginResult.token);
+        
+        if (!configData) {
+            throw new Error("Gagal memuat formulir.");
+        }
+
+        // LANGKAH 3: Render & Tampilkan UI Utama
+        setupUI(configData);
+        
+        // Sembunyikan Modal Login & Tampilkan Kontainer Utama
+        document.getElementById('loginModal').classList.add('hidden');
+        document.getElementById('mainContainer').classList.remove('hidden');
+
     } catch (err) {
-        errorMsg.textContent = "Gagal terhubung ke server.";
+        console.error(err);
+        errorMsg.textContent = err.message || "Terjadi kesalahan koneksi.";
+        // Jika gagal di tengah jalan, hapus token agar bersih
+        localStorage.clear();
     } finally {
         btn.disabled = false;
         btn.textContent = "Masuk";
     }
 });
 
-// --- DYNAMIC FORM ENGINE ---
-
-async function loadConfiguration() {
-    const container = document.getElementById('dynamicFormContainer');
-    
+// Fungsi Fetch Config (Dipisahkan agar bisa dipanggil saat login)
+async function fetchConfigInternal(token) {
     try {
-        const result = await fetchWithAuth({ action: 'getConfig' });
-        
-        if (result && result.status === 'success') {
-            // 1. Set Info Perusahaan
-            document.title = result.settings.pageTitle;
-            document.getElementById('pageTitle').textContent = result.settings.pageTitle;
-            document.getElementById('companyName').textContent = result.settings.companyName;
-            
-            // --- PERUBAHAN DI SINI ---
-            // Menggabungkan Footer Text + @ + Company Name
-            document.getElementById('footerText').textContent = `${result.settings.footerText} @ ${result.settings.companyName}`;
-            // -------------------------
+        const response = await fetch(`${API_BASE}/proxy`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ action: 'getConfig' })
+        });
 
-            // 2. Render Pertanyaan
-            renderQuestions(result.questions);
-        } else {
-            container.innerHTML = '<p class="error-text">Gagal memuat konfigurasi form.</p>';
+        if (!response.ok) return null;
+        
+        const result = await response.json();
+        if (result.status === 'success') {
+            return result;
         }
-    } catch (error) {
-        console.error(error);
-        container.innerHTML = '<p class="error-text">Terjadi kesalahan jaringan.</p>';
+        return null;
+    } catch (e) {
+        throw e;
     }
 }
 
+// Fungsi Setup UI setelah data didapat
+function setupUI(result) {
+    // 1. Set Info Perusahaan
+    document.title = result.settings.pageTitle;
+    document.getElementById('pageTitle').textContent = result.settings.pageTitle;
+    document.getElementById('companyName').textContent = result.settings.companyName;
+    document.getElementById('footerText').textContent = `${result.settings.footerText} @ ${result.settings.companyName}`;
+
+    // 2. Render Pertanyaan
+    renderQuestions(result.questions);
+}
+
+// --- DYNAMIC FORM ENGINE ---
+
 function renderQuestions(questions) {
     const container = document.getElementById('dynamicFormContainer');
-    container.innerHTML = ''; // Bersihkan loading
+    container.innerHTML = ''; 
 
     let currentSection = '';
     let sectionDiv = null;
+    let questionCounter = 1; // POIN 3: Auto Numbering Variable
 
     questions.forEach((q, index) => {
         // Buat Section Baru jika berubah
@@ -108,32 +129,47 @@ function renderQuestions(questions) {
             container.appendChild(sectionDiv);
         }
 
-        // Jika tidak ada section, masukkan ke container langsung (atau section terakhir)
         const target = sectionDiv || container;
         const formGroup = document.createElement('div');
         formGroup.className = 'form-group';
 
+        // POIN 3: Logika Penomoran
+        // Jika tipe 'header', jangan dikasih nomor. Jika pertanyaan biasa, kasih nomor.
+        let labelText = q.label;
+        if (q.type.toLowerCase() !== 'header') {
+            labelText = `${questionCounter}. ${q.label}`;
+            questionCounter++; // Increment nomor
+        }
+
         // Label Pertanyaan
         const label = document.createElement('label');
-        label.innerHTML = `${q.label} ${q.required ? '<span class="required">*</span>' : ''}`;
+        label.innerHTML = `${labelText} ${q.required ? '<span class="required">*</span>' : ''}`;
+        
+        // Jika tipe header, styling beda sedikit (opsional)
+        if (q.type.toLowerCase() === 'header') {
+            label.style.fontWeight = 'bold';
+            label.style.marginTop = '15px';
+            label.style.color = '#4a69bd';
+        }
+
         formGroup.appendChild(label);
 
         // Input Berdasarkan Tipe
         let input;
-        const inputName = `q_${index}`; // ID unik untuk setiap jawaban
+        const inputName = `q_${index}`; 
 
         switch (q.type.toLowerCase()) {
             case 'text':
                 input = document.createElement('input');
                 input.type = 'text';
-                input.name = q.label; // Gunakan label sebagai key JSON nanti
+                input.name = q.label; 
                 if (q.required) input.required = true;
-                // Auto-fill Nama jika labelnya "Nama"
+                // Auto-fill Nama
                 if (q.label.toLowerCase().includes('nama')) {
                     const userData = JSON.parse(localStorage.getItem('userData') || '{}');
                     if (userData.name) {
                         input.value = userData.name;
-                        input.readOnly = true; // Opsional: Kunci agar tidak diubah
+                        input.readOnly = true; 
                     }
                 }
                 break;
@@ -144,7 +180,7 @@ function renderQuestions(questions) {
                 if (q.required) input.required = true;
                 break;
 
-            case 'scale': // Skala 1-5
+            case 'scale': 
                 input = document.createElement('div');
                 input.className = 'scale-group';
                 for (let i = 1; i <= 5; i++) {
@@ -168,10 +204,11 @@ function renderQuestions(questions) {
                 }
                 break;
 
-            case 'radio': // Pilihan Ganda dari kolom Options
+            case 'radio': 
                 input = document.createElement('div');
                 input.className = 'radio-group';
                 q.options.forEach((opt, i) => {
+                    // Wrapper label agar bisa diklik area-nya (POIN 4)
                     const labelOpt = document.createElement('label');
                     labelOpt.className = 'radio-option';
                     
@@ -181,17 +218,20 @@ function renderQuestions(questions) {
                     radio.value = opt.trim();
                     if (q.required) radio.required = true;
 
+                    // Text Node
+                    const textSpan = document.createElement('span');
+                    textSpan.textContent = opt.trim();
+
                     labelOpt.appendChild(radio);
-                    labelOpt.appendChild(document.createTextNode(opt.trim()));
+                    labelOpt.appendChild(textSpan);
                     input.appendChild(labelOpt);
                 });
                 break;
             
-            case 'header': // Hanya teks penjelasan/header sub-section
-                input = document.createElement('p');
-                input.className = 'sub-label';
-                input.textContent = q.options[0] || ''; // Ambil text dari options jika ada
-                label.style.display = 'none'; // Sembunyikan label utama
+            case 'header': 
+                // Header sudah ditangani di bagian label di atas
+                // Input kosongkan saja atau buat hidden
+                input = null;
                 break;
         }
 
@@ -210,11 +250,9 @@ document.getElementById('feedbackForm').addEventListener('submit', async functio
     btn.disabled = true;
     globalLoading.classList.remove('hidden');
 
-    // Kumpulkan Data Dinamis
     const formData = new FormData(this);
     const answers = {};
     
-    // Convert FormData ke Object JSON
     for (let [key, value] of formData.entries()) {
         answers[key] = value;
     }
@@ -231,7 +269,7 @@ document.getElementById('feedbackForm').addEventListener('submit', async functio
         
         if (result && result.status === 'success') {
             alert("Terima kasih! Feedback Anda berhasil disimpan.");
-            window.location.reload(); // Refresh untuk reset
+            window.location.reload(); 
         } else {
             alert("Gagal: " + (result ? result.message : "Unknown error"));
         }
@@ -243,7 +281,7 @@ document.getElementById('feedbackForm').addEventListener('submit', async functio
     }
 });
 
-// --- HELPER ---
+// --- HELPER FETCH ---
 
 async function fetchWithAuth(payload) {
     const token = localStorage.getItem('internToken');
@@ -258,7 +296,7 @@ async function fetchWithAuth(payload) {
     });
 
     if (response.status === 401 || response.status === 403) {
-        localStorage.removeItem('internToken');
+        localStorage.clear();
         location.reload();
         return null;
     }
