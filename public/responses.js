@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
 function checkAuth() {
     const token = localStorage.getItem('internToken');
     if (!token) {
-        window.location.href = 'index.html'; // Redirect ke login jika belum login
+        window.location.href = 'index.html';
     } else {
         loadResponses();
     }
@@ -43,14 +43,14 @@ async function loadResponses() {
 
         if (result.status === 'success') {
             renderTable(result.data);
-            totalLabel.textContent = `Total Respon: ${result.data.length}`;
+            totalLabel.textContent = `Total Respon Masuk: ${result.data.length}`;
         } else {
             tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:red;">${result.message}</td></tr>`;
         }
 
     } catch (error) {
         console.error(error);
-        tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:red;">Gagal memuat data.</td></tr>`;
+        tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:red;">Gagal memuat data. Cek koneksi internet.</td></tr>`;
     }
 }
 
@@ -59,66 +59,76 @@ function renderTable(data) {
     tableBody.innerHTML = '';
 
     if (data.length === 0) {
-        tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center;">Belum ada data respon.</td></tr>`;
+        tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 30px;">Belum ada data respon.</td></tr>`;
         return;
     }
 
     data.forEach((item, index) => {
         const row = document.createElement('tr');
         
-        // Format Tanggal
-        const date = new Date(item.timestamp).toLocaleDateString('id-ID', {
-            day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute:'2-digit'
+        // Format Tanggal yang User Friendly
+        const dateObj = new Date(item.timestamp);
+        const dateStr = dateObj.toLocaleDateString('id-ID', {
+            day: 'numeric', month: 'long', year: 'numeric'
         });
+        const timeStr = dateObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute:'2-digit' });
 
-        // Ambil Divisi dari JSON answers (sesuai key di JSON Anda)
-        const divisi = item.answers['Divisi'] || '-';
+        // Cari Divisi (Coba beberapa kemungkinan key karena JSON dinamis)
+        const divisi = item.answers['Divisi'] || item.answers['Divisi/Tim'] || '-';
 
         row.innerHTML = `
-            <td>${date}</td>
-            <td><strong>${item.name}</strong></td>
-            <td>${divisi}</td>
             <td>
-                <button class="btn-detail" onclick="showDetail(${index})">Lihat Detail</button>
+                <div style="font-weight:bold;">${dateStr}</div>
+                <div style="font-size:12px; color:#666;">${timeStr} WIB</div>
+            </td>
+            <td>${item.name}</td>
+            <td>${divisi}</td>
+            <td style="text-align:center;">
+                <button class="submit-btn" style="padding: 8px 15px; font-size:12px; width:auto;" onclick="showDetail(${index})">
+                    Lihat Detail
+                </button>
             </td>
         `;
         
-        // Simpan data full di elemen row untuk akses cepat
+        // Simpan data di elemen untuk akses cepat
         row.dataset.answers = JSON.stringify(item.answers);
         row.dataset.name = item.name;
+        row.dataset.time = `${dateStr}, ${timeStr} WIB`;
         
         tableBody.appendChild(row);
     });
 }
 
-// --- MODAL DETAIL ---
+// --- MODAL DETAIL (MENAMPILKAN SEMUA DATA) ---
 
 window.showDetail = function(index) {
-    // Ambil data dari row tabel berdasarkan index (karena urutan render sama dengan array data)
-    // Atau cara lebih aman: simpan data global. Tapi dataset row sudah cukup.
     const rows = document.querySelectorAll('#tableBody tr');
     const targetRow = rows[index];
-    
     if (!targetRow) return;
 
     const answers = JSON.parse(targetRow.dataset.answers);
     const name = targetRow.dataset.name;
+    const time = targetRow.dataset.time;
 
     const contentDiv = document.getElementById('detailContent');
-    document.getElementById('detailName').textContent = `Jawaban: ${name}`;
+    document.getElementById('detailName').textContent = name;
+    document.getElementById('detailTime').textContent = `Dikirim pada: ${time}`;
+    
     contentDiv.innerHTML = '';
 
-    // Loop semua key-value di JSON answers
+    // Loop seluruh key yang ada di JSON answers
+    // Kita gunakan Object.entries untuk mendapatkan pasangan [Pertanyaan, Jawaban]
     for (const [question, answer] of Object.entries(answers)) {
-        // Skip jika jawaban kosong (opsional)
-        if (!answer) continue;
+        // Filter: Jangan tampilkan jika jawaban kosong atau null
+        if (!answer || answer === "") continue;
 
         const itemDiv = document.createElement('div');
         itemDiv.className = 'detail-item';
         
+        // Render HTML
         itemDiv.innerHTML = `
-            <div class="detail-question">${question}</div>
-            <div class="detail-answer">${answer.replace(/\n/g, '<br>')}</div>
+            <span class="detail-question">${question}</span>
+            <div class="detail-answer">${answer}</div>
         `;
         contentDiv.appendChild(itemDiv);
     }
