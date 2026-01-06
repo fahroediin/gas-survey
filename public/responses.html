@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Respon - Survey App</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <style>
+        /* Style Khusus Halaman Response */
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        th {
+            background-color: #f8f9fa;
+            color: var(--secondary);
+            font-weight: 600;
+        }
+        tr:hover { background-color: #f1f2f6; }
+        
+        .btn-detail {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .btn-detail:hover { background: var(--secondary); }
+
+        /* Modal Detail Scrollable */
+        .modal-body-scroll {
+            max-height: 70vh;
+            overflow-y: auto;
+            margin-top: 10px;
+            padding-right: 5px;
+        }
+        .detail-item {
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        .detail-question {
+            font-weight: 600;
+            color: #555;
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+        .detail-answer {
+            color: #000;
+            font-size: 14px;
+        }
+        .nav-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .btn-logout {
+            background: transparent;
+            border: 1px solid var(--error);
+            color: var(--error);
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="nav-header">
+                <h1 style="font-size: 20px; margin:0;">Data Respon</h1>
+                <button onclick="logout()" class="btn-logout">Logout</button>
+            </div>
+            <p id="totalResponses">Memuat data...</p>
+        </div>
+        
+        <div class="form-content">
+            <div class="table-container">
+                <table id="responseTable">
+                    <thead>
+                        <tr>
+                            <th>Tanggal</th>
+                            <th>Nama</th>
+                            <th>Divisi</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <!-- Data akan di-render di sini -->
+                        <tr>
+                            <td colspan="4" style="text-align:center;">Memuat data...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="footer">
+            Admin Dashboard
+        </div>
+    </div>
+
+    <!-- Modal Detail Jawaban -->
+    <div id="detailModal" class="modal-overlay hidden">
+        <div class="modal-content login-card" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2 id="detailName">Detail Jawaban</h2>
+                <button onclick="closeModal()" style="float:right; background:none; border:none; font-size:20px; cursor:pointer;">&times;</button>
+            </div>
+            <div id="detailContent" class="modal-body-scroll">
+                <!-- Jawaban lengkap akan muncul di sini -->
+            </div>
+            <div style="margin-top: 20px; text-align: right;">
+                <button onclick="closeModal()" class="submit-btn" style="width: auto; padding: 10px 20px;">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="responses.js"></script>
+</body>
+</html>
