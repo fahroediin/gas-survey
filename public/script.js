@@ -3,7 +3,7 @@ const API_BASE = "/api";
 // 1. Auto Logout saat Refresh
 localStorage.clear();
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('loginModal').classList.remove('hidden');
     // 2. Load Judul & Logo (Public) dengan Skeleton
     loadPublicSettings();
@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // --- LOAD PUBLIC SETTINGS (SKELETON HANDLER) ---
 async function loadPublicSettings() {
     const titleEl = document.getElementById('loginTitleText');
-    
+
     try {
         const response = await fetch(`${API_BASE}/proxy`, {
             method: 'POST',
@@ -21,16 +21,16 @@ async function loadPublicSettings() {
         });
 
         const result = await response.json();
-        
+
         if (result && result.status === 'success') {
             const s = result.settings;
-            
+
             // Update Data Halaman Utama
             document.title = s.pageTitle;
             document.getElementById('pageTitle').textContent = s.pageTitle;
             document.getElementById('companyName').textContent = s.companyName;
             document.getElementById('footerText').textContent = `${s.footerText} @ ${s.companyName}`;
-            
+
             // Update Judul Login
             titleEl.textContent = s.loginTitle || "Login Intern";
 
@@ -40,7 +40,7 @@ async function loadPublicSettings() {
                 skeletons.forEach(el => {
                     el.classList.remove('skeleton', 'skeleton-text');
                     // Reset inline width pada label
-                    if(el.tagName === 'LABEL') el.style.width = '';
+                    if (el.tagName === 'LABEL') el.style.width = '';
                 });
             }, 500);
         }
@@ -54,9 +54,9 @@ async function loadPublicSettings() {
 }
 
 // --- LOGIN HANDLER (PROGRESS BAR) ---
-document.getElementById('loginForm').addEventListener('submit', async function(e) {
+document.getElementById('loginForm').addEventListener('submit', async function (e) {
     e.preventDefault();
-    
+
     const user = document.getElementById('username').value;
     const pass = document.getElementById('password').value;
     const errorMsg = document.getElementById('loginError');
@@ -90,7 +90,7 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
         if (!qData) throw new Error("Gagal memuat pertanyaan.");
 
         renderQuestions(qData.questions);
-        
+
         // Sukses
         document.getElementById('loginModal').classList.add('hidden');
         document.getElementById('mainContainer').classList.remove('hidden');
@@ -123,18 +123,18 @@ async function fetchQuestionsInternal(token) {
 
 function renderQuestions(questions) {
     const container = document.getElementById('dynamicFormContainer');
-    container.innerHTML = ''; 
+    container.innerHTML = '';
 
     let currentSection = '';
     let sectionDiv = null;
-    let questionCounter = 1; 
+    let questionCounter = 1;
 
     questions.forEach((q, index) => {
         if (q.section && q.section !== currentSection) {
             currentSection = q.section;
             sectionDiv = document.createElement('div');
             sectionDiv.className = 'section';
-            
+
             const title = document.createElement('h2');
             title.className = 'section-title';
             title.textContent = currentSection;
@@ -154,7 +154,7 @@ function renderQuestions(questions) {
 
         const label = document.createElement('label');
         label.innerHTML = `${labelText} ${q.required ? '<span class="required">*</span>' : ''}`;
-        
+
         if (q.type.toLowerCase() === 'header') {
             label.style.fontWeight = 'bold';
             label.style.marginTop = '15px';
@@ -163,19 +163,19 @@ function renderQuestions(questions) {
         formGroup.appendChild(label);
 
         let input;
-        const inputName = `q_${index}`; 
+        const inputName = `q_${index}`;
 
         switch (q.type.toLowerCase()) {
             case 'text':
                 input = document.createElement('input');
                 input.type = 'text';
-                input.name = q.label; 
+                input.name = q.label;
                 if (q.required) input.required = true;
                 if (q.label.toLowerCase().includes('nama')) {
                     const userData = JSON.parse(localStorage.getItem('userData') || '{}');
                     if (userData.name) {
                         input.value = userData.name;
-                        input.readOnly = true; 
+                        input.readOnly = true;
                     }
                 }
                 break;
@@ -184,7 +184,7 @@ function renderQuestions(questions) {
                 input.name = q.label;
                 if (q.required) input.required = true;
                 break;
-            case 'scale': 
+            case 'scale':
                 input = document.createElement('div');
                 input.className = 'scale-group';
                 for (let i = 1; i <= 5; i++) {
@@ -204,7 +204,7 @@ function renderQuestions(questions) {
                     input.appendChild(optionDiv);
                 }
                 break;
-            case 'radio': 
+            case 'radio':
                 input = document.createElement('div');
                 input.className = 'radio-group';
                 q.options.forEach((opt) => {
@@ -222,6 +222,31 @@ function renderQuestions(questions) {
                     input.appendChild(labelOpt);
                 });
                 break;
+            case 'checkbox':
+                input = document.createElement('div');
+                input.className = 'checkbox-group';
+                q.options.forEach((opt, optIndex) => {
+                    const labelOpt = document.createElement('label');
+                    labelOpt.className = 'checkbox-option';
+                    labelOpt.style.display = 'flex';
+                    labelOpt.style.alignItems = 'center';
+                    labelOpt.style.gap = '8px';
+                    labelOpt.style.marginBottom = '8px';
+
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.name = q.label;
+                    checkbox.value = opt.trim();
+                    checkbox.id = `${inputName}_${optIndex}`;
+
+                    const textSpan = document.createElement('span');
+                    textSpan.textContent = opt.trim();
+
+                    labelOpt.appendChild(checkbox);
+                    labelOpt.appendChild(textSpan);
+                    input.appendChild(labelOpt);
+                });
+                break;
             case 'header': input = null; break;
         }
 
@@ -231,18 +256,22 @@ function renderQuestions(questions) {
 }
 
 // --- SUBMIT HANDLER ---
-document.getElementById('feedbackForm').addEventListener('submit', async function(e) {
+document.getElementById('feedbackForm').addEventListener('submit', async function (e) {
     e.preventDefault();
     const btn = document.getElementById('submitBtn');
     const globalLoading = document.getElementById('globalLoading');
-    
+
     btn.disabled = true;
     globalLoading.classList.remove('hidden');
 
     const formData = new FormData(this);
     const answers = {};
     for (let [key, value] of formData.entries()) {
-        answers[key] = value;
+        if (answers[key]) {
+            answers[key] += `, ${value}`;
+        } else {
+            answers[key] = value;
+        }
     }
 
     const payload = { action: 'submit', answers: answers };
@@ -263,12 +292,12 @@ document.getElementById('feedbackForm').addEventListener('submit', async functio
             location.reload();
             return;
         }
-        
+
         const result = await response.json();
         globalLoading.classList.add('hidden');
         if (result && result.status === 'success') {
             alert("Terima kasih! Feedback Anda berhasil disimpan.");
-            window.location.reload(); 
+            window.location.reload();
         } else {
             alert("Gagal: " + (result ? result.message : "Unknown error"));
         }

@@ -7,125 +7,65 @@
     <link rel="stylesheet" href="style.css">
     <link rel="icon" type="image/png" href="favicon.png">
     <style>
-        /* Style Khusus Halaman Response */
-        .table-container {
-            overflow-x: auto;
-            margin-top: 20px;
+        /* Override sedikit untuk tabel */
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background-color: #f1f2f6; color: #333; font-weight: bold; }
+        tr:hover { background-color: #fafafa; }
+        .btn-logout { 
+            border: 1px solid #e74c3c; color: #e74c3c; background: transparent; 
+            padding: 5px 15px; border-radius: 4px; cursor: pointer; 
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 600px;
-        }
-        th, td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid #eee;
-        }
-        th {
-            background-color: #f8f9fa;
-            color: var(--secondary);
-            font-weight: 600;
-        }
-        tr:hover { background-color: #f1f2f6; }
-        
-        .btn-detail {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-        }
-        .btn-detail:hover { background: var(--secondary); }
-
-        /* Modal Detail Scrollable */
-        .modal-body-scroll {
-            max-height: 70vh;
-            overflow-y: auto;
-            margin-top: 10px;
-            padding-right: 5px;
-        }
-        .detail-item {
-            margin-bottom: 15px;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 10px;
-        }
-        .detail-question {
-            font-weight: 600;
-            color: #555;
-            font-size: 13px;
-            margin-bottom: 4px;
-        }
-        .detail-answer {
-            color: #000;
-            font-size: 14px;
-        }
-        .nav-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        .btn-logout {
-            background: transparent;
-            border: 1px solid var(--error);
-            color: var(--error);
-            padding: 5px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
+        .btn-logout:hover { background: #e74c3c; color: white; }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="container" style="max-width: 1200px;"> <!-- Container utama diperlebar -->
         <div class="header">
-            <div class="nav-header">
-                <h1 style="font-size: 20px; margin:0;">Data Respon</h1>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h1 style="font-size: 24px; margin:0;">Dashboard Respon</h1>
                 <button onclick="logout()" class="btn-logout">Logout</button>
             </div>
-            <p id="totalResponses">Memuat data...</p>
+            <p id="totalResponses" style="margin-top:10px; opacity:0.8;">Memuat data...</p>
         </div>
         
         <div class="form-content">
-            <div class="table-container">
+            <div class="table-container" style="overflow-x:auto;">
                 <table id="responseTable">
                     <thead>
                         <tr>
                             <th>Tanggal</th>
                             <th>Nama</th>
                             <th>Divisi</th>
-                            <th>Aksi</th>
+                            <th style="text-align:center;">Aksi</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody">
-                        <!-- Data akan di-render di sini -->
-                        <tr>
-                            <td colspan="4" style="text-align:center;">Memuat data...</td>
-                        </tr>
+                        <tr><td colspan="4" style="text-align:center;">Memuat data...</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
-        
-        <div class="footer">
-            Admin Dashboard
-        </div>
     </div>
 
-    <!-- Modal Detail Jawaban -->
+    <!-- MODAL DETAIL (UPDATED) -->
     <div id="detailModal" class="modal-overlay hidden">
-        <div class="modal-content login-card" style="max-width: 600px;">
-            <div class="modal-header">
-                <h2 id="detailName">Detail Jawaban</h2>
-                <button onclick="closeModal()" style="float:right; background:none; border:none; font-size:20px; cursor:pointer;">&times;</button>
+        <!-- Tambahkan class 'modal-wide' di sini -->
+        <div class="modal-content login-card modal-wide">
+            <div class="modal-header" style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <h2 id="detailName" style="margin:0; color:var(--primary);">Detail Jawaban</h2>
+                    <p id="detailTime" style="margin:5px 0 0 0; font-size:13px; color:#666;"></p>
+                </div>
+                <button onclick="closeModal()" style="background:none; border:none; font-size:28px; cursor:pointer; color:#999;">&times;</button>
             </div>
+            
             <div id="detailContent" class="modal-body-scroll">
-                <!-- Jawaban lengkap akan muncul di sini -->
+                <!-- Konten akan di-inject via JS -->
             </div>
-            <div style="margin-top: 20px; text-align: right;">
-                <button onclick="closeModal()" class="submit-btn" style="width: auto; padding: 10px 20px;">Tutup</button>
+            
+            <div style="margin-top: 20px; text-align: right; border-top: 1px solid #eee; padding-top: 15px;">
+                <button onclick="closeModal()" class="submit-btn" style="width: auto; padding: 10px 30px;">Tutup</button>
             </div>
         </div>
     </div>
